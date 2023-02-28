@@ -29,7 +29,7 @@ public class RestHttpClientApp {
 		////////////////////////////////////////////////////////////////////////////////////////////
 		
 //		System.out.println("\n====================================\n");
-//		// 1.1 Http Get 방식 Request : JsonSimple lib 사용
+		// 1.1 Http Get 방식 Request : JsonSimple lib 사용
 //		RestHttpClientApp.getUserTest_JsonSimple();
 		
 //		System.out.println("\n====================================\n");
@@ -42,7 +42,19 @@ public class RestHttpClientApp {
 		
 //		System.out.println("\n====================================\n");
 //		// 1.2 Http Post 방식 Request : CodeHaus lib 사용
-//		RestHttpClientApp.LoginTest_Codehaus();		
+//		RestHttpClientApp.LoginTest_Codehaus();	
+		
+		////////////////////////////////////////////////////////////////////////////////////////////
+		// 08 Repector 추가부분
+		////////////////////////////////////////////////////////////////////////////////////////////
+		
+//		System.out.println("\n====================================\n");
+//		 1.1 Http Get 방식 Request : JsonSimple lib 사용
+//		RestHttpClientApp.getProductTest_JsonSimple();
+		
+		System.out.println("\n====================================\n");
+//		 1.2 Http Post 방식 Request : CodeHaus lib 사용
+		RestHttpClientApp.getUserTest08PostStringJsonSimple();
 	
 	}
 	
@@ -235,5 +247,111 @@ public class RestHttpClientApp {
 		 User user = objectMapper.readValue(jsonobj.toString(), User.class);
 		 System.out.println(user);
 	}	
+	
+	//================================================================//
+	//                    08 Repector 추가부분
+	// 1.GET방식 JsonSimple => getProductTest (23.02.28)
+	// 2.POST방식 JsonSimple => getUserTest (23.02.28) ing
+	//================================================================//
+		//1. Http Protocol GET Request : JsonSimple 3rd party lib 사용
+		public static void getProductTest_JsonSimple() throws Exception{
+			
+			// HttpClient : Http Protocol 의 client 추상화 
+			HttpClient httpClient = new DefaultHttpClient();
+			
+			String url=	"http://127.0.0.1:8080/product/json/getProduct/10001";
+					
+			// HttpGet : Http Protocol 의 GET 방식 Request
+			HttpGet httpGet = new HttpGet(url);
+			httpGet.setHeader("Accept", "application/json");
+			httpGet.setHeader("Content-Type", "application/json");
+			
+			// HttpResponse : Http Protocol 응답 Message 추상화
+			HttpResponse httpResponse = httpClient.execute(httpGet);
+			
+			//==> Response 확인
+			System.out.println(httpResponse);
+			System.out.println();
+
+			//==> Response 중 entity(DATA) 확인
+			HttpEntity httpEntity = httpResponse.getEntity();
+			
+			//==> InputStream 생성
+			InputStream is = httpEntity.getContent();
+			BufferedReader br = new BufferedReader(new InputStreamReader(is,"UTF-8"));
+			
+			System.out.println("[ Server 에서 받은 Data 확인 ] ");
+			String serverData = br.readLine();
+			System.out.println(serverData);
+			
+			//==> 내용읽기(JSON Value 확인)
+			JSONObject jsonobj = (JSONObject)JSONValue.parse(serverData);
+			System.out.println(jsonobj);
+		}
+		
+		//2. Http Protocol POST Request : FormData 전달 / JsonSimple 3rd party lib 사용
+		public static void getUserTest08PostStringJsonSimple() throws Exception{
+			
+			// HttpClient : Http Protocol 의 client 추상화
+			HttpClient httpClient = new DefaultHttpClient();
+			
+			// Request URL Make
+			String url = "http://127.0.0.1:8080/user/json/getUser/user01";
+			
+			// HttpPost : Http Protocol  POST 방식 Request Header 구성
+			HttpPost httpPost = new HttpPost(url);
+			httpPost.setHeader("Accept", "application/json");
+			httpPost.setHeader("Content-Type", "application/json");
+			
+			//==> POST 방식은 Body 에 Data 전송
+			//==> QueryString (name = value)으로 전송하지 않고 
+			//==> JSONData 전송위해 Data Make
+			
+			//[ 방법 1 : String 사용]
+//				String data =  "{\"userId\":\"test\",\"userName\":\"홍길동\"}";
+//				String data =  "{\"userId\":\"test\",\"password\":\"1234\",\"userName\":\"user\"}"
+//							 + "{\"addr\":\"서울시\",\"email\":\"user@naver.com\"}";
+//				HttpEntity httpEntity01 = new StringEntity(data,"utf-8");
+			
+			//[ 방법 2 : JSONObject 사용]
+//			JSONObject json = new JSONObject();
+//			json.put("userId", "admin");
+//			json.put("password", "1234");
+//			HttpEntity httpEntity01 = new StringEntity(json.toString(),"utf-8");
+				
+//			==> Request Header/Body 중 Body 만들기(?)
+//			 HttpEntity : Http Protocol Body 추상화 Bean
+//			HttpEntity requestHttpEntity = new StringEntity(data.toString(),"utf-8");
+//			httpPost.setEntity(httpEntity01);			
+				
+			// Request 실행 및 Response 받기(?)
+			// HttpResponse : Http Protocol 응답 Message 추상화 Bean			
+			HttpResponse httpResponse = httpClient.execute(httpPost);
+			
+			
+			//==> Response 확인
+			System.out.println(httpResponse);
+			System.out.println();
+
+			//==> Response Header/Body 중 entity(DATA) 확인
+			HttpEntity httpEntity = httpResponse.getEntity();
+			
+			//==>Server 에서 받은 Data 읽기위해 HttpEntity로 부터 InputStream 생성
+			InputStream is = httpEntity.getContent();
+			BufferedReader br = new BufferedReader(new InputStreamReader(is,"UTF-8"));
+			
+			System.out.println("[ Server 에서 받은 Data 확인 ] ");
+			String serverData = br.readLine();
+			System.out.println(serverData);
+			
+			//==> 내용읽기(JSON Value 확인)
+			JSONObject jsonobj = (JSONObject)JSONValue.parse(serverData);
+			System.out.println(jsonobj);
+		
+		}
+		
+		
+		
+		
 	
 }
